@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
 
-public interface IBookRepository extends JpaRepository<BookEntity, String> {
+public interface IBookRepository extends JpaRepository<BookEntity, Long> {
 	List<BookEntity> findBookByTitle(String title);
 	List<BookEntity> findBookByEditorial(EditorialEntity editorial);
 }
