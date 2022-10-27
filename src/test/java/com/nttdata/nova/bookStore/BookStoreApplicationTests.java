@@ -3,21 +3,23 @@ package com.nttdata.nova.bookStore;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+import com.nttdata.nova.bookStore.repository.*;
+import com.nttdata.nova.bookStore.entity.*;
+
 @DataJpaTest
 
 class BookStoreApplicationTests {
@@ -30,11 +32,11 @@ class BookStoreApplicationTests {
 	
     @BeforeEach
     public void init(){
-        BookEntity book1 = new BookEntity(1,"TestTitle1","TestAuthor1", LocalDate.now(),11,"TestDescription1",null);
-        BookEntity book2 = new BookEntity(2,"TestTitle2","TestAuthor2", LocalDate.now(),12,"TestDescription2",null);
+        BookEntity book1 = new BookEntity((long) 1,"TestTitle1","TestAuthor1", LocalDate.now(),11,"TestDescription1",null);
+        BookEntity book2 = new BookEntity((long) 2,"TestTitle2","TestAuthor2", LocalDate.now(),12,"TestDescription2",null);
 
-        EditorialEntity editorial1 = new EditorialEntity(1,"Editorial1", Set.of(book1));
-        EditorialEntity editorial2 = new EditorialEntity(2,"Editorial2",Set.of(book2));
+        EditorialEntity editorial1 = new EditorialEntity((long) 1,"Editorial1", Set.of(book1));
+        EditorialEntity editorial2 = new EditorialEntity((long) 2,"Editorial2",Set.of(book2));
 
         iBookRepository.save(book1);
         iBookRepository.save(book2);
@@ -44,20 +46,24 @@ class BookStoreApplicationTests {
   
 	void contextLoads() {
     	
+		@Nested
 		@DisplayName("Book Tests")
 		class BookTests{
+			
 			@Test
+			@Order(1)
 	        public void addBook(){
 	
-	            BookEntity book3 = new BookEntity(3,"TestTitle3","TestAuthor3", LocalDate.now(),13,"TestDescription3",null);
+	            BookEntity newBook = new BookEntity((long) 3, "TestTitle3", "TestAuthor3", LocalDate.now(), 13, "TestDescription3", null);
 	            int sizeBeforeInsert = iBookRepository.findAll().size();
-	            iBookRepository.save(book3);
+	            iBookRepository.save(newBook);
 	            int sizeAfterInsert = iBookRepository.findAll().size();
 	
 	            assertEquals(sizeBeforeInsert,sizeAfterInsert-1);
 	        }
 			
 			@Test
+			@Order(2)
 	        public void getByTitle(){
 	            List<BookEntity> request = iBookRepository.findAll();
 	            String titleToFound = request.get(0).getTitle();
@@ -67,6 +73,17 @@ class BookStoreApplicationTests {
 	        }
 			
 			@Test
+			@Order(3)
+			public void getByEditorial() {
+				List<BookEntity> request = iBookRepository.findAll();
+				EditorialEntity editorialToFound = request.get(0).getEditorialEntity();
+				
+				List<BookEntity> response = iBookRepository.findBookByEditorial(editorialToFound);
+				assertThat(response).isNotEmpty();
+			}
+			
+			@Test
+			@Order(4)
 	        public void updateBookById(){
 
 	            BookEntity bookToUpdate = iBookRepository.findAll().get(0);
@@ -80,6 +97,7 @@ class BookStoreApplicationTests {
 	        }
 			
 			@Test
+			@Order(5)
 	        public void deleteBookById(){
 
 	            BookEntity bookToDelete = iBookRepository.findAll().get(0);
@@ -90,11 +108,12 @@ class BookStoreApplicationTests {
 	        }
 		}
 		
+		@Nested
 		@DisplayName("Editorial Tests")
 	    class EditorialTests{
 			@Test
 	        public void addNewEditorial() {
-				EditorialEntity newEditorial = new EditorialEntity(3,"Cerbero",Set.of());
+				EditorialEntity newEditorial = new EditorialEntity((long) 3, "Cerbero", Set.of());
 	            int sizeBeforeSave = iEditorialRepository.findAll().size();
 	            iEditorialRepository.save(newEditorial);
 	            int sizeAfterSave = iEditorialRepository.findAll().size();
@@ -106,6 +125,14 @@ class BookStoreApplicationTests {
 	            List<EditorialEntity> allEditorials = iEditorialRepository.findAll();
 	            assertThat(allEditorials).isNotEmpty();
 	        }
+			
+			@Test
+			public void getByName() {
+				List<EditorialEntity> request = iEditorialRepository.findAll();
+				String nameToFound = request.get(0).getName();
+				List<EditorialEntity> response = iEditorialRepository.findByName(nameToFound);
+				assertThat(response).isNotEmpty();
+			}
 			
 			@Test
 	        public void deleteEditorialById() {

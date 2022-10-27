@@ -1,27 +1,50 @@
-package com.nttdata.nova.bookStore;
+package com.nttdata.nova.bookStore.entity;
 
 import java.time.LocalDate;
-import java.util.Date;
-
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import com.nttdata.nova.bookStore.EditorialEntity;
-
 
 @Entity
-@Table(name="Books")
+@Table(name="books")
+
 
 public class BookEntity {
+	@Id
+	@Column(name="ID")
 	private Long id;
+	
+	@Column(name="TITLE")
 	private String title;
+	
+	@Column(name="AUTHOR")
 	private String author;
-	private Date publish;
+	
+	@Column(name="PUBLISH")
+	private LocalDate publish;
+	
+	@Column(name="PAGES")
 	private Integer pages;
+	
+	@Column(name="DESCRIPTION")
 	private String description;
+	
+	@ManyToOne(fetch = FetchType.EAGER, optional = false)
+	@JoinColumn(name="EDITORIAL", nullable = false)
     private EditorialEntity editorial;
     
-    public BookEntity(int i, String string, String string2, LocalDate now, Integer j, String string3, EditorialEntity object) {
-
+    public BookEntity(Long i, String string, String string2, LocalDate now, Integer j, String string3, EditorialEntity object) {
+    	this.id = i;
+    	this.title = string;
+    	this.author = string2;
+    	this.publish = now;
+    	this.pages = j;
+    	this.description = string3;
+    	this.editorial = object;
 	}
 	public Long getId() {
 		return id;
@@ -41,10 +64,10 @@ public class BookEntity {
 	public void setAuthor(String author) {
 		this.author = author;
 	}
-	public Date getPublish() {
+	public LocalDate getPublish() {
 		return publish;
 	}
-	public void setPublish(Date publish) {
+	public void setPublish(LocalDate publish) {
 		this.publish = publish;
 	}
 	public Integer getPages() {
