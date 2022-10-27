@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nttdata.nova.bookStore.entity.*;
-import com.nttdata.nova.bookStore.service.*;
-import com.nttdata.nova.bookStore.repository.*;
+import com.nttdata.nova.bookStore.dto.EditorialDTO;
+import com.nttdata.nova.bookStore.service.impl.EditorialService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,59 +28,66 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 public class EditorialController {
 	@Autowired
-	private IEditorialRepository iEditorialRepository;
-	
-	@Autowired
 	private EditorialService editorialservice;
 	
 	@GetMapping("/api/all-editorials")
-	@Operation(summary = "Read all of the existing editorials from the data base")
+	@Operation(summary = "Find all of the existing editorials")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Editorials list found & returned", content = @Content),
 			@ApiResponse(responseCode = "404", description = "No editorials found", content = @Content) })
-	public ResponseEntity<List<EditorialEntity>> getAllEditorials() {
-		if(editorialservice.EditorialisEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(editorialservice.getAllEditorials(), HttpStatus.OK);
+	public ResponseEntity<List<EditorialDTO>> getAllEditorials() {
+		return new ResponseEntity<List<EditorialDTO>>(editorialservice.findAll(), HttpStatus.OK);
+	}
+	
+	@GetMapping(path = "/api/editorial/{id}")
+	@Operation(summary = "Find an editorial by id")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Editorials list found & returned", content = @Content),
+			@ApiResponse(responseCode = "404", description = "No editorials found", content = @Content) })
+	public ResponseEntity<EditorialDTO> getEditorialById(@PathVariable("id") Long id){
+		return new ResponseEntity<EditorialDTO>(editorialservice.findById(id), HttpStatus.OK);
+	}
+	
+	@GetMapping(path = "/api/editorial/{name}")
+	@Operation(summary = "Find an editorial by name")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Editorials list found & returned", content = @Content),
+			@ApiResponse(responseCode = "404", description = "No editorials found", content = @Content) })
+	public ResponseEntity<List<EditorialDTO>> getEditorialByName(@PathVariable("name") String name){
+		return new ResponseEntity<List<EditorialDTO>>(editorialservice.findByName(name), HttpStatus.OK);
 	}
 	
 	@PostMapping("/api/editorial")
-	@Operation(summary = "Create a new editorial & save it into the database")
+	@Operation(summary = "Create an editorial & post it into the database")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Editorials list found & returned",
 					content = { @Content(mediaType = "application/json",
-							schema = @Schema(implementation = EditorialEntity.class)) })})
-	public ResponseEntity<String> createEditorial(@RequestBody EditorialEntity editorialentity){
-		editorialservice.save(editorialentity); 
-		return new ResponseEntity<>(HttpStatus.CREATED);
+							schema = @Schema(implementation = EditorialDTO.class)) })})
+	public ResponseEntity<EditorialDTO> createEditorial(@RequestBody EditorialDTO editorial){
+		EditorialDTO editorialDto = editorialservice.save(editorial);
+		return new ResponseEntity<EditorialDTO>(editorialDto, HttpStatus.CREATED);
 	}
 	
-	@PostMapping("/api/update-editorial/{id}")
-	@Operation(summary = "Update a editorial status by id")
+	@PutMapping("/api/update-editorial")
+	@Operation(summary = "Update an editorial by id")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Editorial status changed",
+			@ApiResponse(responseCode = "200", description = "Editorial id updated",
 					content = { @Content(mediaType = "application/json",
-							schema = @Schema(implementation = EditorialEntity.class)) }),
+							schema = @Schema(implementation = EditorialDTO.class)) }),
 			@ApiResponse(responseCode = "404", description = "No editorials found", content = @Content) })
-	public ResponseEntity<String> updateEditorial(@PathVariable("id") long id){
-		if(editorialservice.EditorialexistsById(id)) {
-			((EditorialEntity) iEditorialRepository).setId(id);
-			return new ResponseEntity<>(HttpStatus.OK);
-		}
-		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<EditorialDTO> updateEditorial(@RequestBody EditorialDTO editorial){
+		return new ResponseEntity<EditorialDTO>(editorialservice.update(editorial), HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/api/delete-editorial/{id}")
-	@Operation(summary = "Delete a editorial by id")
+	@Operation(summary = "Delete an editorial by id")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Editorial deleted", content = @Content),
 			@ApiResponse(responseCode = "404", description = "No editorial found", content = @Content) })
-	public ResponseEntity<String> deleteBook(@PathVariable("id") long id){
-		if(editorialservice.EditorialexistsById(id)) {
-			editorialservice.deleteEditorialById(id);
-			return new ResponseEntity<>(HttpStatus.OK);
-		}
-		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<String> deleteBook(@PathVariable("id") Long id){
+		EditorialDTO editorial = editorialservice.findById(id);
+		editorialservice.delete(editorial);
+
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 }

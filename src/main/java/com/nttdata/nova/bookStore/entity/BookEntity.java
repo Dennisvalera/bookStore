@@ -9,11 +9,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.nttdata.nova.bookStore.dto.BookDTO;
+
 @Entity
 @Table(name="books")
 
 
 public class BookEntity {
+	
 	@Id
 	@Column(name="ID")
 	private Long id;
@@ -46,6 +49,17 @@ public class BookEntity {
     	this.description = string3;
     	this.editorial = object;
 	}
+    
+    public BookEntity(BookDTO bookDto) {
+		this.id = bookDto.getId();
+		this.title = bookDto.getTitle();
+		this.author = bookDto.getAuthor();
+		this.publish = bookDto.getPublish();
+		this.pages = bookDto.getPages();
+		this.description = bookDto.getDescription();
+		this.editorial = new EditorialEntity(bookDto.getEditorial());
+	}
+    
 	public Long getId() {
 		return id;
 	}

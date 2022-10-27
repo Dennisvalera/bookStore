@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.nttdata.nova.bookStore.dto.EditorialDTO;
+
 @Entity
 @Table(name="editorials")
 
@@ -28,6 +30,13 @@ public class EditorialEntity {
 		this.name = string;
 		this.booklist = object;
 	}
+	
+	public EditorialEntity(EditorialDTO editorialDto) {
+		this.id = editorialDto.getId();
+		this.name = editorialDto.getName();
+	}
+	
+
 	public Long getId() {
 		return id;
 	}

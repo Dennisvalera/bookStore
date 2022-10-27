@@ -9,13 +9,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nttdata.nova.bookStore.entity.BookEntity;
-import com.nttdata.nova.bookStore.service.BookService;
-import com.nttdata.nova.bookStore.repository.IBookRepository;
+import com.nttdata.nova.bookStore.dto.BookDTO;
+import com.nttdata.nova.bookStore.dto.EditorialDTO;
+import com.nttdata.nova.bookStore.service.impl.BookService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,59 +29,64 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 public class BookController {
 	@Autowired
-	private IBookRepository iBookRepository;
-	
-	@Autowired
 	private BookService bookservice;
 	
 	@GetMapping("/api/all-books")
-	@Operation(summary = "Get all of the existing books from the data base")
+	@Operation(summary = "Find all of the existing books")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Books list found & returned", content = @Content),
 			@ApiResponse(responseCode = "404", description = "No books found", content = @Content) })
-	public ResponseEntity<List<BookEntity>> getAllBooks() {
-		if(bookservice.BookisEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-	    return new ResponseEntity<>(bookservice.getAllBooks(), HttpStatus.OK);
+	public ResponseEntity<List<BookDTO>> getAllBooks() {
+		return new ResponseEntity<List<BookDTO>>(bookservice.findAll(), HttpStatus.OK);
 	}
 	
-	@GetMapping("/api/book/editorial")
-	@Operation(summary = "Get a book through an editorial from the data base")
+	@GetMapping(path = "/api/book/{id}")
+	@Operation(summary = "Find a book by id")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Book found & returned", content = @Content),
 			@ApiResponse(responseCode = "404", description = "No book found", content = @Content) })
-	public ResponseEntity<List<BookEntity>> getBook() {
-		if(bookservice.BookisEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-	    return new ResponseEntity<>(bookservice.getBook(), HttpStatus.OK);
+	public ResponseEntity<BookDTO> getBookById(@PathVariable("id") Long id) {
+		return new ResponseEntity<BookDTO>(bookservice.findById(id), HttpStatus.OK);
+	}
+	
+	@GetMapping(path = "/api/book/{title}")
+	@Operation(summary = "Find a book by title")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Book found & returned", content = @Content),
+			@ApiResponse(responseCode = "404", description = "No book found", content = @Content) })
+	public ResponseEntity<List<BookDTO>> getBookByTitle(@PathVariable("title") String title) {
+		return new ResponseEntity<List<BookDTO>>(bookservice.findByTitle(title), HttpStatus.OK);
+	}
+	
+	@GetMapping("/api/book/editorial")
+	@Operation(summary = "Find a book by editorial")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Book found & returned", content = @Content),
+			@ApiResponse(responseCode = "404", description = "No book found", content = @Content) })
+	public ResponseEntity<List<BookDTO>> getBookByEditorial(@RequestBody EditorialDTO editorial) {
+	    return new ResponseEntity<List<BookDTO>>(bookservice.findByEditorial(editorial), HttpStatus.OK);
 	}
 	
 	@PostMapping("/api/book")
-	@Operation(summary = "Create a new book & save it into the database")
+	@Operation(summary = "Create a new book & post it into the database")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Books list found & returned",
 					content = { @Content(mediaType = "application/json",
-							schema = @Schema(implementation = BookEntity.class)) })})
-	public ResponseEntity<String> createBook(@RequestBody BookEntity bookentity){
-		bookservice.save(bookentity);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+							schema = @Schema(implementation = BookDTO.class)) })})
+	public ResponseEntity<BookDTO> createBook(@RequestBody BookDTO bookdto){
+		BookDTO bookDto = bookservice.save(bookdto);
+		return new ResponseEntity<BookDTO>(bookDto, HttpStatus.CREATED);
 	}
 	
-	@PostMapping("/api/update-book/{id}")
-	@Operation(summary = "Modify a book status by id")
+	@PutMapping("/api/update-book")
+	@Operation(summary = "Update a book")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Book status changed",
+			@ApiResponse(responseCode = "200", description = "Book updated",
 					content = { @Content(mediaType = "application/json",
-							schema = @Schema(implementation = BookEntity.class)) }),
+							schema = @Schema(implementation = BookDTO.class)) }),
 			@ApiResponse(responseCode = "404", description = "No book found", content = @Content) })
-	public ResponseEntity<String> updateBook(@PathVariable("id") long id){
-		if(bookservice.BookexistsById(id)) {
-			((BookEntity) iBookRepository).setId(id);
-			return new ResponseEntity<>(HttpStatus.OK);
-		}
-		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<BookDTO> updateBook(@RequestBody BookDTO bookdto){
+			return new ResponseEntity<BookDTO>(bookservice.update(bookdto), HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/api/delete-book/{id}")
@@ -88,11 +94,10 @@ public class BookController {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Book deleted", content = @Content),
 			@ApiResponse(responseCode = "404", description = "No book found", content = @Content) })
-	public ResponseEntity<String> deleteBook(@PathVariable("id") long id){
-		if(bookservice.BookexistsById(id)) {
-			bookservice.deleteBookById(id);
-			return new ResponseEntity<>(HttpStatus.OK);
-		}
-		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<String> deleteBook(@PathVariable("id") Long id){
+		BookDTO bookdto = bookservice.findById(id);
+		bookservice.delete(bookdto);
+		
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 }
