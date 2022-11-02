@@ -1,27 +1,30 @@
 package com.nttdata.nova.bookStore.dto;
 
-import java.time.LocalDate;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.nttdata.nova.bookStore.entity.*;
+import java.util.Date;
 
-public class BookDTO{
+import org.springframework.hateoas.RepresentationModel;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nttdata.nova.bookStore.entity.BookEntity;
+
+public class BookDTO extends RepresentationModel<BookDTO>{
 
 	@JsonProperty("id")
 	private Long id;
 	
-	@JsonProperty("titulo")
+	@JsonProperty("title")
 	private String title;
 
-	@JsonProperty("autor")
+	@JsonProperty("author")
 	private String author;
 	
-	@JsonProperty("publicado")
-	private LocalDate publish;
+	@JsonProperty("date")
+	private Date publish;
 
-	@JsonProperty("paginas")
+	@JsonProperty("pages")
 	private Integer pages;
 	
-	@JsonProperty("descripcion")
+	@JsonProperty("description")
 	private String description;
 	
 	@JsonProperty("editorial")
@@ -37,7 +40,7 @@ public class BookDTO{
 		this.publish = bookentity.getPublish();
 		this.pages = bookentity.getPages();
 		this.description = bookentity.getDescription();
-		this.editorial = new EditorialDTO(bookentity.getEditorialEntity());
+		this.editorial = new EditorialDTO(bookentity.getEditorial());
 	}
 	
 	
@@ -59,10 +62,10 @@ public class BookDTO{
 	public void setAuthor(String author) {
 		this.author = author;
 	}
-	public LocalDate getPublish() {
+	public Date getPublish() {
 		return publish;
 	}
-	public void setPublish(LocalDate publish) {
+	public void setPublish(Date publish) {
 		this.publish = publish;
 	}
 	public Integer getPages() {

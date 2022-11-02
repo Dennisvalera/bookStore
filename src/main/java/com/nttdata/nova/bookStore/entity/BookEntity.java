@@ -1,9 +1,12 @@
 package com.nttdata.nova.bookStore.entity;
 
-import java.time.LocalDate;
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -14,10 +17,9 @@ import com.nttdata.nova.bookStore.dto.BookDTO;
 @Entity
 @Table(name="books")
 
-
 public class BookEntity {
-	
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_seq")
 	@Column(name="ID")
 	private Long id;
 	
@@ -28,7 +30,7 @@ public class BookEntity {
 	private String author;
 	
 	@Column(name="PUBLISH")
-	private LocalDate publish;
+	private Date publish;
 	
 	@Column(name="PAGES")
 	private Integer pages;
@@ -40,11 +42,11 @@ public class BookEntity {
 	@JoinColumn(name="EDITORIAL", nullable = false)
     private EditorialEntity editorial;
     
-    public BookEntity(Long i, String string, String string2, LocalDate now, Integer j, String string3, EditorialEntity object) {
+    public BookEntity(Long i, String string, String string2, Date Date, Integer j, String string3, EditorialEntity object) {
     	this.id = i;
     	this.title = string;
     	this.author = string2;
-    	this.publish = now;
+    	this.publish = Date;
     	this.pages = j;
     	this.description = string3;
     	this.editorial = object;
@@ -58,6 +60,9 @@ public class BookEntity {
 		this.pages = bookDto.getPages();
 		this.description = bookDto.getDescription();
 		this.editorial = new EditorialEntity(bookDto.getEditorial());
+	}
+    
+    public BookEntity() {
 	}
     
 	public Long getId() {
@@ -78,10 +83,10 @@ public class BookEntity {
 	public void setAuthor(String author) {
 		this.author = author;
 	}
-	public LocalDate getPublish() {
+	public Date getPublish() {
 		return publish;
 	}
-	public void setPublish(LocalDate publish) {
+	public void setPublish(Date publish) {
 		this.publish = publish;
 	}
 	public Integer getPages() {
@@ -96,10 +101,10 @@ public class BookEntity {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public EditorialEntity getEditorialEntity() {
+	public EditorialEntity getEditorial() {
 		return editorial;
 	}
-	public void setEditorialEntity(EditorialEntity editorial) {
+	public void setEditorial(EditorialEntity editorial) {
 		this.editorial = editorial;
 	}
 }

@@ -1,13 +1,15 @@
 package com.nttdata.nova.bookStore.dto;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nttdata.nova.bookStore.entity.EditorialEntity;
 
-public class EditorialDTO{
+public class EditorialDTO extends RepresentationModel<EditorialDTO>{
 	@JsonProperty("id")
 	private Long id;
 	
-	@JsonProperty("nombre")
+	@JsonProperty("name")
 	private String name;
 	
 
@@ -35,4 +37,5 @@ public class EditorialDTO{
 	public void setName(String name) {
 		this.name = name;
 	}
+
 }
